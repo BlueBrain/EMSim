@@ -1,0 +1,6 @@
+build
+Build
+Debug
+Release
+Makefile
+CMakeLists.txt.user*

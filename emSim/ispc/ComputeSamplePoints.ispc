@@ -2,7 +2,8 @@
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  *
- * This file is part of LFPNator <https://github.com/???????/??????>
+ * This file is part of EMSim
+ * <https://bbpcode.epfl.ch/code/#/admin/projects/viz/EMSim>
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -23,57 +24,70 @@
 #define Ec 0.281704249f
 #define THREAD_MULTIPLIER 4
 
-task void computeValues(
-    const uniform float eventFlatPos[], const uniform float eventRadii[],
-    const uniform float eventPowers[], const uniform unsigned int32 nTimeSteps,
-    const uniform unsigned int32 nEvents, const uniform float spFlatPositions[],
-    uniform float spValues[], const uniform unsigned int32 nSamplePoints,
-    const uniform unsigned int32 nIterations)
+task void computeValues(const uniform float eventFlatPos[],
+                        const uniform float eventRadii[],
+                        const uniform float eventPowers[],
+                        const uniform unsigned int32 nEvents,
+                        const uniform unsigned int32 currentFrame,
+                        const uniform float spFlatPositions[],
+                        uniform float spValues[],
+                        const uniform unsigned int32 nSamplePoints,
+                        const uniform unsigned int32 nSamplePointsPerThread)
 {
-    for (unsigned int32 i = 0; i < nSamplePoints; ++i)
+    for (unsigned int32 i = 0; i < nSamplePointsPerThread; ++i)
+    {
+        const unsigned int32 currentSamplePoint =
+            taskIndex * nSamplePointsPerThread + i;
+        if (currentSamplePoint >= nSamplePoints)
+            continue;
+
+        const unsigned int64 spIndex = currentSamplePoint * 3;
+
         for (unsigned int32 j = 0; j < nEvents; ++j)
         {
-            for (unsigned int32 k = 0; k < nIterations; ++k)
-            {
-                const unsigned int32 eventIndex = j * 3;
-                const unsigned int32 spIndex = i * 3;
-                const unsigned int32 timeIndex = taskIndex * nIterations + k;
+            const unsigned int64 eventIndex = j * 3;
+            const float deltaX =
+                spFlatPositions[spIndex] - eventFlatPos[eventIndex];
+            const float deltaY =
+                spFlatPositions[spIndex + 1] - eventFlatPos[eventIndex + 1];
+            const float deltaZ =
+                spFlatPositions[spIndex + 2] - eventFlatPos[eventIndex + 2];
 
-                const float deltaX =
-                    spFlatPositions[spIndex] - eventFlatPos[eventIndex];
-                const float deltaY =
-                    spFlatPositions[spIndex + 1] - eventFlatPos[eventIndex + 1];
-                const float deltaZ =
-                    spFlatPositions[spIndex + 2] - eventFlatPos[eventIndex + 2];
+            const float squaredDist =
+                deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ;
 
-                const float squaredDist =
-                    deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ;
+            const float eventRadius = eventRadii[j];
+            float distInv = 0;
+            if (squaredDist > eventRadius * eventRadius)
+                distInv = rsqrt(squaredDist);
+            else
+                distInv = rcp(eventRadius);
 
-                const float eventRadius = eventRadii[j];
-                float distInv = 0;
-                if (squaredDist > eventRadius * eventRadius)
-                    distInv = rsqrt(squaredDist);
-                else
-                    distInv = rcp(eventRadius);
-
-                if (timeIndex < nTimeSteps)
-                    spValues[timeIndex * nSamplePoints + i] +=
-                        Ec * eventPowers[timeIndex * nEvents + j] * distInv;
-            }
+            spValues[currentFrame * nSamplePoints + currentSamplePoint] +=
+                Ec * eventPowers[j] * distInv;
         }
+    }
 }
 
-export void ComputeSamplePoints_ispc(
-    const uniform float eventFlatPos[], const uniform float eventRadii[],
-    const uniform float eventPowers[], const uniform unsigned int32 nTimeSteps,
-    const uniform unsigned int32 nEvents, const uniform float spFlatPositions[],
-    uniform float spValues[], const uniform unsigned int32 nSamplePoints)
+export void ComputeSamplePoints_ispc(const uniform float eventFlatPos[],
+                                     const uniform float eventRadii[],
+                                     const uniform float eventPowers[],
+                                     const uniform unsigned int32 nEvents,
+                                     const uniform unsigned int32 currentFrame,
+                                     const uniform float spFlatPositions[],
+                                     uniform float spValues[],
+                                     const uniform unsigned int32 nSamplePoints)
 {
-    const uniform unsigned int32 nThreads = num_cores() * THREAD_MULTIPLIER;
+    uniform unsigned int32 nThreads = num_cores() * THREAD_MULTIPLIER;
+    if (nSamplePoints < 2 * nThreads)
+        nThreads = nSamplePoints;
 
-    const uniform unsigned int32 nIterations = nTimeSteps / nThreads + 1;
+    // Integer ceil. Works if nTimeSteps != 0
+    const uniform unsigned int32 nSamplePointsPerThread =
+        (nSamplePoints - 1) / nThreads + 1;
 
     launch[nThreads] computeValues(eventFlatPos, eventRadii, eventPowers,
-                                   nTimeSteps, nEvents, spFlatPositions,
-                                   spValues, nSamplePoints, nIterations);
+                                   nEvents, currentFrame, spFlatPositions,
+                                   spValues, nSamplePoints,
+                                   nSamplePointsPerThread);
 }

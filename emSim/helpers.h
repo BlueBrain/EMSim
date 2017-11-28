@@ -3,7 +3,7 @@
  * Responsible Author: Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  *
  * This file is part of EMSim
- * <https://bbpcode.epfl.ch/code/#/admin/projects/viz/EMSim>
+ * <https://bbpcode.epfl.ch/browse/code/viz/EMSim/>
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -28,21 +28,60 @@
 
 namespace lfp
 {
-const uint32_t alignment = 64u;
+const uint32_t alignment = 32u;
 
 template <typename T>
 struct AlignedMemoryDeleter
 {
+#ifdef USE_ALIGNED_MALLOC
     void operator()(T* mem) { _mm_free(mem); }
+#else
+    void operator()(T* mem) { free(mem); }
+#endif
 };
 
 using AlignedFloatPtr = std::unique_ptr<float[], AlignedMemoryDeleter<float>>;
 
 template <typename T>
-T* alignedMalloc(uint32_t numberOfElements)
+T* alignedMalloc(size_t numberOfElements)
 {
-    return (T*)_mm_malloc(numberOfElements * sizeof(T), alignment);
+#ifdef USE_ALIGNED_MALLOC
+    T* ptr = (T*)_mm_malloc(numberOfElements * sizeof(T), alignment);
+#else
+    T* ptr = (T*)malloc(numberOfElements * sizeof(T));
+#endif
+    if (ptr == 0)
+        throw(std::bad_alloc( ));
+
+    return ptr;
 }
+
+struct EventsAABB
+{
+    void add(const glm::vec3& pos, const float radius)
+    {
+        if (pos.x - radius < min.x)
+            min.x = pos.x - radius;
+        if (pos.y - radius < min.y)
+            min.y = pos.y - radius;
+        if (pos.z - radius < min.z)
+            min.z = pos.z - radius;
+
+        if (pos.x + radius > max.x)
+            max.x = pos.x + radius;
+        if (pos.y + radius > max.y)
+            max.y = pos.y + radius;
+        if (pos.z + radius > max.z)
+            max.z = pos.z + radius;
+    }
+
+    glm::vec3 min = glm::vec3(std::numeric_limits<float>::max(),
+                              std::numeric_limits<float>::max(),
+                              std::numeric_limits<float>::max());
+    glm::vec3 max = glm::vec3(-std::numeric_limits<float>::max(),
+                              -std::numeric_limits<float>::max(),
+                              -std::numeric_limits<float>::max());
+};
 }
 
 #endif // _EMSim_helpers_h_

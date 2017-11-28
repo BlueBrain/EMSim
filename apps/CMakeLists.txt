@@ -2,7 +2,7 @@
 # All rights reserved. Do not distribute without permission.
 # Responsible Author: Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
 #
-# This file is part of EMSim <https://bbpcode.epfl.ch/code/#/admin/projects/viz/EMSim>
+# This file is part of EMSim <https://bbpcode.epfl.ch/browse/code/viz/EMSim/>
 #
 # This library is free software; you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License version 3.0 as published

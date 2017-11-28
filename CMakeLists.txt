@@ -2,7 +2,7 @@
 # All rights reserved. Do not distribute without permission.
 # Responsible Author: Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
 #
-# This file is part of EMSim <https://bbpcode.epfl.ch/code/#/admin/projects/viz/EMSim>
+# This file is part of EMSim <https://bbpcode.epfl.ch/browse/code/viz/EMSim/>
 
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 project(EMSim VERSION 1.0.0)
@@ -21,10 +21,29 @@ set(COMMON_PROJECT_DOMAIN ch.epfl.bluebrain)
 set(EMSIM_DEB_DEPENDS libboost-program-options-dev libboost-test-dev libglm-dev)
 
 include(Common)
-common_find_package(glm REQUIRED SYSTEM)
+
+#glm should be required but the current Ubuntu package is broken so removing
+#the REQUIRED keyword is a temporary fix.
+common_find_package(glm SYSTEM)
 common_find_package(Boost REQUIRED COMPONENTS unit_test_framework program_options)
 common_find_package(Brion REQUIRED)
 common_find_package_post()
+
+set(ISPC_BINARY ispc)
+
+find_program(ISPC ispc)
+if(NOT ISPC)
+  set(ISPC_BINARY ${CMAKE_BINARY_DIR}/ispc-v1.9.2-linux/ispc)
+  if(NOT EXISTS ${ISPC_BINARY})
+    message("ispc not found. Trying to download... " ${ISPC_BINARY})
+    file(DOWNLOAD
+         https://sourceforge.net/projects/ispcmirror/files/v1.9.2/ispc-v1.9.2-linux.tar.gz
+         ${CMAKE_BINARY_DIR}/ispc-v1.9.2-linux.tar.gz
+         SHOW_PROGRESS)
+    execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzf ispc-v1.9.2-linux.tar.gz
+                    WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+  endif()
+endif()
 
 add_subdirectory(apps)
 add_subdirectory(emSim)

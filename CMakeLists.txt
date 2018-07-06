@@ -22,9 +22,6 @@ set(EMSIM_DEB_DEPENDS libboost-program-options-dev libboost-test-dev libglm-dev)
 
 include(Common)
 
-#glm should be required but the current Ubuntu package is broken so removing
-#the REQUIRED keyword is a temporary fix.
-common_find_package(glm SYSTEM)
 common_find_package(Boost REQUIRED COMPONENTS unit_test_framework program_options)
 common_find_package(Brion REQUIRED)
 common_find_package_post()
@@ -45,11 +42,11 @@ if(NOT ISPC)
   endif()
 endif()
 
+add_subdirectory(glm)
 add_subdirectory(apps)
 add_subdirectory(emSim)
 add_subdirectory(tests)
 
 set(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/README.md")
 set(EMSIM_PACKAGE_DEB_DEPENDS libboost-program-options-dev libglm-dev)
-include(CommonCPack)
 include(DoxygenRule)

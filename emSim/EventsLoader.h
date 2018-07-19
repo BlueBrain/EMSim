@@ -109,7 +109,7 @@ private:
     glm::vec2 _timeRange = glm::vec2(0.0f, 0.0f);
     EventsAABB _circuitAABB;
     std::unique_ptr<Events> _events;
-    float _currentTimeStep = 0.0f;
+    uint32_t _currentFrame = 0u;
 };
 }
 #endif // _EventsLoader_h_

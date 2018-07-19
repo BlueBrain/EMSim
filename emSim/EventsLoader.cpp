@@ -38,7 +38,6 @@ EventsLoader::EventsLoader(const std::string& filePath,
     _report.reset(new brion::CompartmentReport(reportSource, brion::MODE_READ));
 
     _validateTimeRange();
-    _currentTimeStep = _timeRange.x;
 
     _numberOfFrames =
         1u + std::floor((_timeRange.y - _timeRange.x) / _report->getTimestep() +
@@ -51,9 +50,9 @@ EventsLoader::EventsLoader(const std::string& filePath,
 const Events& EventsLoader::loadNextFrame()
 {
     memcpy(_events->getPowers(),
-           _report->loadFrame(_currentTimeStep).get()->data(),
+           _report->loadFrame(_currentFrame * _report->getTimestep() + _timeRange.x).get()->data(),
            _report->getFrameSize() * sizeof(float));
-    _currentTimeStep += _report->getTimestep();
+    ++_currentFrame;
     return *_events;
 }
 

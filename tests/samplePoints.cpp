@@ -57,10 +57,10 @@ BOOST_AUTO_TEST_CASE(refineSamplePoints)
     BOOST_CHECK_CLOSE(samplePoints.getValues()[2], 0.0f, 0.01);
     BOOST_CHECK_CLOSE(samplePoints.getValues()[7], 0.0f, 0.01);
     BOOST_CHECK_CLOSE(samplePoints.getValues()[202], 0.0f, 0.01);
-    BOOST_CHECK_CLOSE(samplePoints.getValues()[8], -0.0147492f, 0.01);
-    BOOST_CHECK_CLOSE(samplePoints.getValues()[9], -0.0151961f, 0.01);
-    BOOST_CHECK_CLOSE(samplePoints.getValues()[31], 0.0392614f, 0.01);
-    BOOST_CHECK_CLOSE(samplePoints.getValues()[271], 0.303871f, 0.01);
-    BOOST_CHECK_CLOSE(samplePoints.getValues()[270], -0.303871f, 0.01);
-    BOOST_CHECK_CLOSE(samplePoints.getValues()[136], 0.170521f, 0.01);
+    BOOST_CHECK_CLOSE(samplePoints.getValues()[8], -14.7492f, 0.01);
+    BOOST_CHECK_CLOSE(samplePoints.getValues()[9], -15.1961f, 0.01);
+    BOOST_CHECK_CLOSE(samplePoints.getValues()[31], 039.2614f, 0.01);
+    BOOST_CHECK_CLOSE(samplePoints.getValues()[271], 303.871f, 0.01);
+    BOOST_CHECK_CLOSE(samplePoints.getValues()[270], -303.871f, 0.01);
+    BOOST_CHECK_CLOSE(samplePoints.getValues()[136], 170.521f, 0.01);
 }

@@ -20,8 +20,8 @@
  */
 
 // Ec =  1 / (4 * PI * conductivity),
-// with conductivity = 1 / 3.54 (siemens per meter)
-#define Ec 0.281704249f
+// with conductivity = 1000 / 3.54 (siemens per micrometer)
+#define Ec 281.704249f
 #define THREAD_MULTIPLIER 4
 
 task void computeValues(
@@ -34,17 +34,17 @@ task void computeValues(
     const uniform float originY, const uniform float originZ,
     const uniform unsigned int32 zSliceSize)
 {
-    const unsigned int32 startZ = taskIndex * zSliceSize;
-    const unsigned int32 endZ = startZ + zSliceSize;
+    const int32 startZ = taskIndex * zSliceSize;
+    const int32 endZ = startZ + zSliceSize;
 
-    for (unsigned int32 z = startZ; z < endZ; ++z)
+    for (int32 z = startZ; z < endZ; ++z)
     {
         if (z >= sizeZ)
             continue;
 
-        for (unsigned int32 y = 0; y < sizeY; ++y)
+        for (int32 y = 0; y < (int32)sizeY; ++y)
         {
-            for (unsigned int32 x = 0; x < sizeX; ++x)
+            for (int32 x = 0; x < (int32)sizeX; ++x)
             {
                 const float voxelPosX = originX + x * resX;
                 const float voxelPosY = originY + y * resY;
@@ -65,20 +65,18 @@ task void computeValues(
                         deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ;
 
                     const float eventRadius = eventRadii[i];
-                    float distInv = 0;
-                    if (squaredDist > eventRadius * eventRadius)
-                        distInv = rsqrt(squaredDist);
-                    else
-                        distInv = rcp(eventRadius);
-
-                    voxelValue += Ec * eventPowers[i] * distInv;
+                    const float distInv =
+                        squaredDist > eventRadius * eventRadius
+                            ? rsqrt(squaredDist)
+                            : rcp(eventRadius);
+                    voxelValue += eventPowers[i] * distInv;
                 }
                 const unsigned int64 index =
                     (unsigned int64)z * (unsigned int64)sizeX *
                         (unsigned int64)sizeY +
                     (unsigned int64)y * (unsigned int64)sizeX +
                     (unsigned int64)x;
-                volumeData[index] = voxelValue;
+                volumeData[index] = Ec * voxelValue;
             }
         }
     }

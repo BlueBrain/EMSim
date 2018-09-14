@@ -68,22 +68,14 @@ void EventsLoader::_loadStaticEventGeometry()
     std::cout << "INFO: Compartments count: " << _events->getEventsCount()
               << std::endl;
 
-    uint32_t moprhosPerBatch = 1000u;
-    uint32_t batchesCount = (_gids.size() - 1u) / moprhosPerBatch + 1u;
+    constexpr size_t morphosPerBatch = 1000u;
 
-    for (uint32_t currentBatch = 0u; currentBatch < batchesCount;
-         ++currentBatch)
+    auto itFirst = _gids.begin();
+    while (itFirst != _gids.end())
     {
-        auto itFirst = _gids.begin();
         auto itLast = itFirst;
-
-        std::advance(itFirst, currentBatch * moprhosPerBatch);
-
-        const uint32_t lastIndex = (currentBatch + 1u) * moprhosPerBatch;
-        if (lastIndex >= _gids.size())
-            itLast = _gids.end();
-        else
-            std::advance(itLast, lastIndex);
+        for (size_t i = 0; i != morphosPerBatch && itLast != _gids.end(); ++i)
+            ++itLast;
 
         brain::GIDSet gidsPerBatch(itFirst, itLast);
 
@@ -94,6 +86,8 @@ void EventsLoader::_loadStaticEventGeometry()
         const auto mapping = _computeInverseMapping();
 
         _computeStaticEventGeometry(mapping, morphologies);
+
+        itFirst = itLast;
     }
     std::cout << "INFO: Full AABB: x:[" << _circuitAABB.min.x << " "
               << _circuitAABB.max.x << "] y:[" << _circuitAABB.min.y << " "

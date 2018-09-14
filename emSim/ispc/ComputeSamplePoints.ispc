@@ -20,8 +20,8 @@
  */
 
 // Ec =  1 / (4 * PI * conductivity),
-// with conductivity = 1 / 3.54 (siemens per meter)
-#define Ec 0.281704249f
+// with conductivity = 1000 / 3.54 (siemens per micrometer)
+#define Ec 281.704249f
 #define THREAD_MULTIPLIER 4
 
 task void computeValues(const uniform float eventFlatPos[],
@@ -42,7 +42,7 @@ task void computeValues(const uniform float eventFlatPos[],
             continue;
 
         const unsigned int64 spIndex = currentSamplePoint * 3;
-
+        float accum = 0;
         for (unsigned int32 j = 0; j < nEvents; ++j)
         {
             const unsigned int64 eventIndex = j * 3;
@@ -57,15 +57,12 @@ task void computeValues(const uniform float eventFlatPos[],
                 deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ;
 
             const float eventRadius = eventRadii[j];
-            float distInv = 0;
-            if (squaredDist > eventRadius * eventRadius)
-                distInv = rsqrt(squaredDist);
-            else
-                distInv = rcp(eventRadius);
-
-            spValues[currentFrame * nSamplePoints + currentSamplePoint] +=
-                Ec * eventPowers[j] * distInv;
+            const float distInv = squaredDist > eventRadius * eventRadius
+                                      ? rsqrt(squaredDist)
+                                      : rcp(eventRadius);
+            accum += eventPowers[j] * distInv;
         }
+        spValues[currentFrame * nSamplePoints + currentSamplePoint] = Ec * accum;
     }
 }
 
@@ -82,7 +79,6 @@ export void ComputeSamplePoints_ispc(const uniform float eventFlatPos[],
     if (nSamplePoints < 2 * nThreads)
         nThreads = nSamplePoints;
 
-    // Integer ceil. Works if nTimeSteps != 0
     const uniform unsigned int32 nSamplePointsPerThread =
         (nSamplePoints - 1) / nThreads + 1;
 

@@ -50,7 +50,11 @@ EventsLoader::EventsLoader(const std::string& filePath,
 const Events& EventsLoader::loadNextFrame()
 {
     memcpy(_events->getPowers(),
-           _report->loadFrame(_currentFrame * _report->getTimestep() + _timeRange.x).get()->data(),
+           _report
+               ->loadFrame(_currentFrame * _report->getTimestep() +
+                           _timeRange.x)
+               .get()
+               .data->data(),
            _report->getFrameSize() * sizeof(float));
     ++_currentFrame;
     return *_events;
@@ -95,8 +99,9 @@ void EventsLoader::_loadStaticEventGeometry()
               << _circuitAABB.max.z << "]" << std::endl;
 }
 
-void EventsLoader::_computeStaticEventGeometry(const FlatInverseMapping& mapping,
-                                               const brain::neuron::Morphologies& morphologies)
+void EventsLoader::_computeStaticEventGeometry(
+    const FlatInverseMapping& mapping,
+    const brain::neuron::Morphologies& morphologies)
 {
     for (const auto& j : mapping)
     {
@@ -114,10 +119,8 @@ void EventsLoader::_computeStaticEventGeometry(const FlatInverseMapping& mapping
             {
                 auto pos = soma.getCentroid();
                 float radius = soma.getMeanRadius();
-                _events->addEvent(glm::vec3(pos.x(), pos.y(), pos.z()),
-                                  radius);
-                _circuitAABB.add(glm::vec3(pos.x(), pos.y(), pos.z()),
-                                 radius);
+                _events->addEvent(glm::vec3(pos.x(), pos.y(), pos.z()), radius);
+                _circuitAABB.add(glm::vec3(pos.x(), pos.y(), pos.z()), radius);
             }
             continue;
         }
@@ -132,8 +135,7 @@ void EventsLoader::_computeStaticEventGeometry(const FlatInverseMapping& mapping
         const auto& neuronSection = morphology.getSection(sectionId);
 
         // actual compartment length
-        const float compartmentLength =
-            normLength * neuronSection.getLength();
+        const float compartmentLength = normLength * neuronSection.getLength();
 
         const auto& points = neuronSection.getSamples(samples);
 
@@ -155,7 +157,9 @@ void EventsLoader::_validateCurrentReport(const brain::GIDSet& gidSet) const
     const uint32_t compartmentCount = _report->getFrameSize();
     std::vector<float> compartmentCurrents(compartmentCount);
     memcpy(compartmentCurrents.data(),
-           _report->loadFrame((_timeRange.x + _timeRange.y) / 2u).get()->data(),
+           _report->loadFrame((_timeRange.x + _timeRange.y) / 2u)
+               .get()
+               .data->data(),
            compartmentCount * sizeof(float));
 
     float currentsSum = 0.0f;

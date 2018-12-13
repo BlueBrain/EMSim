@@ -56,8 +56,8 @@ BOOST_AUTO_TEST_CASE(computeVolume)
 
     volume.compute( events );
 
-    BOOST_CHECK_CLOSE(volume.getData()[100], 2.389415f, 0.01);
-    BOOST_CHECK_CLOSE(volume.getData()[15000], 2.556937, 0.01);
-    BOOST_CHECK_CLOSE(volume.getData()[240000], 3.130926, 0.01);
-    BOOST_CHECK_CLOSE(volume.getData()[1000000], 3.44999, 0.01);
+    BOOST_CHECK_CLOSE(volume.getData()[100], 2389.415f, 0.01);
+    BOOST_CHECK_CLOSE(volume.getData()[15000], 2556.937f, 0.01);
+    BOOST_CHECK_CLOSE(volume.getData()[240000], 3130.926f, 0.01);
+    BOOST_CHECK_CLOSE(volume.getData()[1000000], 3449.999f, 0.01);
 }

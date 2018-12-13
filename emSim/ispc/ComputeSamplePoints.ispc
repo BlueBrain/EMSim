@@ -20,8 +20,8 @@
  */
 
 // Ec =  1 / (4 * PI * conductivity),
-// with conductivity = 1000 / 3.54 (siemens per micrometer)
-#define Ec 281.704249f
+// with conductivity = 1 / 1000000 * 3.54 (siemens per micrometer)
+#define Ec 281704.249f
 #define THREAD_MULTIPLIER 4
 
 task void computeValues(const uniform float eventFlatPos[],

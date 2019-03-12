@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_CASE(refineSamplePoints)
 {
     const size_t nTimeSteps = 91u;
     const size_t nEvents = 2u;
-    lfp::Events events(nEvents);
+    ems::Events events(nEvents);
 
     events.addEvent(glm::vec3(-0.5f, 0.0f, 0.0f), 0.25f);
     events.addEvent(glm::vec3(0.5f, 0.0f, 0.0f), 0.25f);
@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(refineSamplePoints)
     positions.push_back(glm::vec3(-0.5f, 0.0f, 0.0f));
     positions.push_back(glm::vec3(-0.6f, 0.0f, 0.0f));
 
-    lfp::SamplePoints samplePoints(nTimeSteps, positions);
+    ems::SamplePoints samplePoints(nTimeSteps, positions);
 
     const float power = 1.0f;
     for (uint32_t i = 0; i < nTimeSteps; ++i)

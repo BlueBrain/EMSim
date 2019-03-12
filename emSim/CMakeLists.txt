@@ -43,16 +43,20 @@ foreach(ISPC_FILE ${ISPC_FILES})
 list(APPEND EMSIMCOMMON_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/${ISPC_FILE}.h )
 endforeach()
 
-set(EMSIMCOMMON_PUBLIC_HEADERS Events.h
+set(EMSIMCOMMON_PUBLIC_HEADERS AttenuationCurve.h
+                               Events.h
                                EventsLoader.h
                                helpers.h
                                SamplePoints.h
-                               Volume.h)
+                               Volume.h
+                               VSDLoader.h)
 
-set(EMSIMCOMMON_SOURCES Events.cpp
+set(EMSIMCOMMON_SOURCES AttenuationCurve.cpp
+                        Events.cpp
                         EventsLoader.cpp
                         SamplePoints.cpp
                         Volume.cpp
+                        VSDLoader.cpp
                         ispc/tasksys.cpp)
 
 foreach(ISPC_FILE ${ISPC_FILES})

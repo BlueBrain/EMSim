@@ -25,10 +25,10 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/program_options.hpp>
 
+#include <emSim/ComputeVolume.h>
 #include <emSim/EventsLoader.h>
 #include <emSim/SamplePoints.h>
 #include <emSim/Volume.h>
-#include <emSim/helpers.h>
 
 namespace std
 {
@@ -46,6 +46,16 @@ std::istream& operator>>(std::istream& in, glm::vec3& position)
 
     return in;
 }
+}
+
+void computeLFP(const ems::Events& events, std::shared_ptr<ems::Volume> volume)
+{
+    ispc::ComputeVolume_ispc(events.getFlatPositions(), events.getRadii(),
+                             events.getPowers(), events.getEventsCount(),
+                             volume->getData(), volume->getSize().x, volume->getSize().y,
+                             volume->getSize().z, volume->getVoxelSize().x, volume->getVoxelSize().y,
+                             volume->getVoxelSize().z, volume->getOrigin().x, volume->getOrigin().y, 
+                             volume->getOrigin().y);
 }
 
 struct EmsimParams
@@ -118,32 +128,32 @@ bool parseArgs(EmsimParams& params, int argc, char* argv[])
 
 void process(const EmsimParams& params)
 {
-    lfp::EventsLoader eventLoader(params.inputFile, params.target, params.report,
+    ems::EventsLoader eventLoader(params.inputFile, params.target, params.report,
                                   params.timeRange, params.fraction);
 
-    std::unique_ptr<lfp::SamplePoints> samplePoints;
-    std::unique_ptr<lfp::Volume> volume;
+    std::unique_ptr<ems::SamplePoints> samplePoints;
+    std::shared_ptr<ems::Volume> volume;
 
     if (!params.samplePointsPos.empty())
-        samplePoints.reset(new lfp::SamplePoints(eventLoader.getFramesCount(),
+        samplePoints.reset(new ems::SamplePoints(eventLoader.getFramesCount(),
                                                  params.samplePointsPos));
 
     if (params.exportVolume)
         volume.reset(
-            new lfp::Volume(params.voxelSize, params.extent, eventLoader.getCircuitAABB()));
+            new ems::Volume(params.voxelSize, params.extent, eventLoader.getCircuitAABB()));
 
     for (uint32_t i = 0; i < eventLoader.getFramesCount(); ++i)
     {
-        const lfp::Events& events = eventLoader.loadNextFrame();
+        const ems::Events& events = eventLoader.loadNextFrame();
 
         if(!params.samplePointsPos.empty())
             samplePoints->computeNextFrame(events);
 
         if(params.exportVolume)
         {
-            volume->compute(events);
+            computeLFP(events, volume);
             volume->writeToFile(eventLoader.getTimeRange().x +
-                                    i * eventLoader.getDt(),
+                                    i * eventLoader.getDt(), eventLoader.getDt(),
                                 eventLoader.getDataUnit(), params.outputFile,
                                 params.inputFile, params.report, params.target);
         }

@@ -17,5 +17,7 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-add_subdirectory(emsimLFP)
-add_subdirectory(emsimVSD)
+set(EMSIMVSD_SOURCES main.cpp)
+set(EMSIMVSD_LINK_LIBRARIES PUBLIC boost_program_options EMSimCommon )
+
+common_application( emsimVSD )

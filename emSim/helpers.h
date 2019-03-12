@@ -22,11 +22,13 @@
 #ifndef _EMSim_helpers_h_
 #define _EMSim_helpers_h_
 
+#include <iomanip>
 #include <memory>
+#include <sstream>
 
 #include <glm/glm.hpp>
 
-namespace lfp
+namespace ems
 {
 const uint32_t alignment = 32u;
 
@@ -56,6 +58,22 @@ T* alignedMalloc(size_t numberOfElements)
     return ptr;
 }
 
+inline std::string createTimeStepSuffix(const float time)
+{
+    std::stringstream stream;
+    stream << std::fixed << std::setprecision(4) << time;
+    std::string timeStepRounded = stream.str();
+
+    for (uint32_t i = timeStepRounded.length() - 1; i > 0; --i)
+    {
+        if ((timeStepRounded[i] == '0') && (timeStepRounded[i-1] != '.'))
+            timeStepRounded.erase(i, 1);
+        else
+            break;
+    }
+    return timeStepRounded;
+}
+
 struct EventsAABB
 {
     void add(const glm::vec3& pos, const float radius)
@@ -82,6 +100,7 @@ struct EventsAABB
                               -std::numeric_limits<float>::max(),
                               -std::numeric_limits<float>::max());
 };
+
 }
 
 #endif // _EMSim_helpers_h_

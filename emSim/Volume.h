@@ -27,8 +27,9 @@
 #include <vector>
 
 #include <emSim/Events.h>
+#include <emSim/helpers.h>
 
-namespace lfp
+namespace ems
 {
 /**
  * This class is responsable for computing a 3d volume.
@@ -57,25 +58,31 @@ public:
     Volume(const Volume& event) = delete;
     Volume& operator=(const Volume& event) = delete;
 
-    /**
-     * Compute the values of all voxels for the current frame.
-     * @param events the events of the current frame.
-     */
-    void compute(const Events& events);
+    void clear(const float value = 0.0f);
 
     /**
      * Write sample points values for all time steps in a file.
-     * @param timeStep the time step used to compute the volume
+     * @param time the current time
+     * @param the timeStep used for the computation
      * @param dataUnit a string describing the data units (ex: "mA")
      * @param outputFile the file name where the volume will be written
      * @param blueconfig the name of the blueconfig
      * @param report the name of the report
      * @param target the name of the target
      */
-    void writeToFile(const float timeStep, const std::string& dataUnit,
-                     const std::string& outputFile,
-                     const std::string& blueconfig, const std::string& report,
+    void writeToFile(const float time, const float timeStep, 
+                     const std::string& dataUnit, const std::string& outputFile, 
+                     const std::string& blueconfig, const std::string& report, 
                      const std::string& target);
+
+   /**
+     * Write sample points values for all time steps in a file.
+     * @param time the current time
+     * @param dataUnit a string describing the data units (ex: "mA")
+     * @param outputFile the file name where the volume will be written
+     */
+    void writeToFileMhd(const float time, const std::string& dataUnit, 
+                     const std::string& outputFile);
 
     /**
      * @return 3d vector containing the size of the volume in voxels.
@@ -88,18 +95,22 @@ public:
     const glm::vec3& getOrigin() const;
 
     /**
-     * @return 3d vector containing the (anisotropic) size of a voxel.
+     * @return 3d vector containing the (anisotropic) size of a voxel in micrometers.
      */
-    const glm::vec3& getResolution() const;
+    const glm::vec3& getVoxelSize() const;
 
     /**
      * @return The pointer to the voxels values.
+     */
+    float* getData();
+
+    /**
+     * @return The const pointer to the voxels values.
      */
     const float* getData() const;
 
 private:
     uint64_t _getVoxelCount() const;
-    std::string _createTimeStepSuffix(float timeStep) const;
 
     glm::vec3 _voxelSize;
     glm::uvec3 _volumeSize;

@@ -28,7 +28,7 @@
 
 #include <emSim/Events.h>
 
-namespace lfp
+namespace ems
 {
 /**
  * This class is responsable for computing the values of sample points.

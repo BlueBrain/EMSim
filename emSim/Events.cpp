@@ -24,7 +24,7 @@
 #include <emSim/Events.h>
 #include <emSim/helpers.h>
 
-namespace lfp
+namespace ems
 {
 Events::Events(const size_t nEvents)
     : _nEvents(nEvents)

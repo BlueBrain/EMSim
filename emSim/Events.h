@@ -29,7 +29,7 @@
 
 #include <emSim/helpers.h>
 
-namespace lfp
+namespace ems
 {
 /**
  * This class store the events' geometric data (position and radius) and power

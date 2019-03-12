@@ -21,7 +21,7 @@
 
 #include <emSim/EventsLoader.h>
 
-namespace lfp
+namespace ems
 {
 EventsLoader::EventsLoader(const std::string& filePath,
                            const std::string& target, const std::string& report,
@@ -49,12 +49,9 @@ EventsLoader::EventsLoader(const std::string& filePath,
 
 const Events& EventsLoader::loadNextFrame()
 {
-    memcpy(_events->getPowers(),
-           _report
-               ->loadFrame(_currentFrame * _report->getTimestep() +
-                           _timeRange.x)
-               .get()
-               .data->data(),
+    const auto& values = _report->loadFrame(_currentFrame * _report->getTimestep() +
+                                            _timeRange.x).get().data;
+    memcpy(_events->getPowers(), values->data(),
            _report->getFrameSize() * sizeof(float));
     ++_currentFrame;
     return *_events;
@@ -69,7 +66,7 @@ void EventsLoader::_loadStaticEventGeometry()
 {
     _report->updateMapping(_gids);
     _events.reset(new Events(_report->getFrameSize()));
-    std::cout << "INFO: Compartments count: " << _events->getEventsCount()
+    std::cout << "INFO: Loading " << _events->getEventsCount() << " compartments... " 
               << std::endl;
 
     constexpr size_t morphosPerBatch = 1000u;
@@ -156,10 +153,9 @@ void EventsLoader::_validateCurrentReport(const brain::GIDSet& gidSet) const
 
     const uint32_t compartmentCount = _report->getFrameSize();
     std::vector<float> compartmentCurrents(compartmentCount);
-    memcpy(compartmentCurrents.data(),
-           _report->loadFrame((_timeRange.x + _timeRange.y) / 2u)
-               .get()
-               .data->data(),
+    const auto& values = _report->loadFrame(
+                            (_timeRange.x + _timeRange.y) / 2u).get().data;
+    memcpy(compartmentCurrents.data(), values->data(),
            compartmentCount * sizeof(float));
 
     float currentsSum = 0.0f;

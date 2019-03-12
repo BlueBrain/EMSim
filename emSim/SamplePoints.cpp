@@ -28,7 +28,7 @@
 #include <emSim/SamplePoints.h>
 #include <emSim/helpers.h>
 
-namespace lfp
+namespace ems
 {
 SamplePoints::SamplePoints(uint32_t nTimeSteps,
                            const std::vector<glm::vec3>& positions)

@@ -28,7 +28,7 @@
 #include <brain/neuron/types.h>
 #include <brion/brion.h>
 
-namespace lfp
+namespace ems
 {
 /** Tuple of buffer offset, cell index, section ID, compartment counts */
 typedef std::tuple<size_t, uint32_t, uint32_t, uint16_t> MappingElement;

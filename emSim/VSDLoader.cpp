@@ -54,7 +54,7 @@ VSDLoader::VSDLoader(const VSDParams& params)
 
     _reportArea->updateMapping(_gids);
     _areas = _reportArea->loadFrame(0.0f).get().data;
-         
+
     _loadStaticEventGeometry(params.sensorDim, params.sensorRes, params.interpolateAttenuation);
 
     _numberOfFrames = 1u + std::floor((_timeRange.y - _timeRange.x) / _reportVoltage->getTimestep() + 0.5f);
@@ -79,6 +79,7 @@ const std::shared_ptr<Volume> VSDLoader::loadNextFrame()
         else
             continue;
     }
+    ++_currentFrame;
     return _volume;
 }
 

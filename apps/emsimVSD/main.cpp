@@ -45,14 +45,32 @@ std::vector<float> projectVSD(const std::shared_ptr<ems::Volume> volume)
     return image;
 }
 
-void writeImageToFile(const std::vector<float>& image, const std::string& outputFile, const float time)
+void writeImageToFile(const std::vector<float>& image, const std::string& outputFile, const float time, 
+                      const glm::vec2& pixelSize, const glm::vec2& imageSize)
 {
-    std::ofstream output;
-    output.open(outputFile + "_image_floats_" +
-                    ems::createTimeStepSuffix(time) + ".raw",
-                std::ios::out | std::ios::binary);
-    output.write((char*)image.data(), sizeof(float) * image.size());
-    output.close();
+    std::ofstream rawFile;
+    const std::string rawFileName = outputFile + "_image_floats_" + ems::createTimeStepSuffix(time) + ".raw";
+    rawFile.open(rawFileName, std::ios::out | std::ios::binary);
+    rawFile.write((char*)image.data(), sizeof(float) * image.size());
+    rawFile.close();
+
+    std::ofstream mhdFile;
+    mhdFile.open(outputFile + "_image_floats_" + ems::createTimeStepSuffix(time) + ".mhd");
+
+    mhdFile << "ObjectType = Image\n"
+            << "NDims = 2\n"
+            << "BinaryData = True\n"
+            << "BinaryDataByteOrderMSB = False\n"
+            << "CompressedData = False\n"
+            << "TransformMatrix = 1 0 0 0 1 0 0 0 1\n"
+            << "Offset = 0 0 0\n"
+            << "CenterOfRotation = 0 0 0\n"
+            << "AnatomicalOrientation = 0 0 0\n"
+            << "ElementSpacing = "<< pixelSize.x << " " << pixelSize.y << "\n"
+            << "DimSize = "<< imageSize.x << " " << imageSize.y << "\n"
+            << "ElementType = MET_FLOAT\n"
+            << "ElementDataFile = " << rawFileName << "\n"
+            << std::endl;
 }
 
 bool parseArgs(ems::VSDParams& params, int argc, char* argv[])
@@ -76,13 +94,14 @@ bool parseArgs(ems::VSDParams& params, int argc, char* argv[])
         ("curve", po::value<std::string>(&params.curveFile), "Path to the dye curve file (default: no attenuation)")
         ("start-time", po::value<float>(&params.timeRange.x), "The start time of the simulation")
         ("end-time", po::value<float>(&params.timeRange.y), "The end time of the simulation")
+        ("time-step", po::value<float>(&params.timeStep), "The time between frames")
         ("fraction", po::value<float>(&params.fraction), "Specify the fraction [0.0 1.0] of gids to be used "
          "during the computation. Default is 1.0.")
         ("export-volume", "Will export a floating point volume for each time steps.")
         ("depth", po::value<float>(&params.depth)->default_value(params.depth), "Depth of the attenuation curve area of "
          "influence. It also defines the Y-coordinate at which it starts being applied down until y=0 (default: 2081.756 "
          "micrometers).")
-        ("interpolate-attenuation", "Will export a floating point volume for each time steps.")
+        ("interpolate-attenuation", "Will interpolate the attenuation curve.")
         ("sigma", po::value<float>(&params.sigma)->default_value(params.sigma), "Absorption + scattering coefficient "
          "(units per micrometer) in the Beer-Lambert law. Must be a positive value (default: 0.0045).")
         ("v0", po::value<float>(&params.v0)->default_value(params.v0), "Resting potential (default: -65 mV).")
@@ -121,9 +140,6 @@ bool parseArgs(ems::VSDParams& params, int argc, char* argv[])
         params.interpolateAttenuation = true;
 
     if (vm.count("soma-pixels"))
-        params.somaPixel = true;
-
-    if (vm.count("soma-pixels"))
         params.exportSomaPixels = true;
 
     return true;
@@ -136,7 +152,6 @@ void process(const ems::VSDParams& params)
 
     for(uint32_t i = 0; i < vsdLoader.getFramesCount(); ++i)
     {
-        std::cout << "Computing frame: " << i << std::endl;
         const std::shared_ptr<ems::Volume> volume = vsdLoader.loadNextFrame();
         const float currentTime = vsdLoader.getTimeRange().x + i * vsdLoader.getDt();
         if(params.exportVolume)
@@ -145,7 +160,9 @@ void process(const ems::VSDParams& params)
                                    params.outputFileName);
         }
         std::vector<float> image = projectVSD(volume);
-        writeImageToFile(image, params.outputFileName, currentTime);
+        const glm::vec2 imageSize(volume->getSize().x, volume->getSize().z);
+        const glm::vec2 pixelSize(volume->getVoxelSize().x, volume->getVoxelSize().z);
+        writeImageToFile(image, params.outputFileName, currentTime, pixelSize, imageSize);
     }
 }
 

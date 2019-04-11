@@ -49,6 +49,7 @@ struct VSDParams
     float sigma = 0.0045f;
     float g0 = 0.0f;
     float v0 = -65.0f;
+    float timeStep = 0.1f;
     float apThreshold = std::numeric_limits<float>::max();
     float fraction = 1.0f;
     //float dt;

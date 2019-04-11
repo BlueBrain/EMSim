@@ -88,7 +88,7 @@ void Volume::writeToFile(const float time, const float timeStep,
 
 void Volume::writeToFileMhd(const float time,
                             const std::string& dataUnit, 
-                         const std::string& outputFile)
+                            const std::string& outputFile)
 {
     const std::string volumeFileName = outputFile + "_volume_floats" + createTimeStepSuffix(time) + ".raw";
     std::ofstream output;
@@ -108,7 +108,7 @@ void Volume::writeToFileMhd(const float time,
             << "BinaryDataByteOrderMSB = False\n"
             << "CompressedData = False\n"
             << "TransformMatrix = 1 0 0 0 1 0 0 0 1\n"
-            << "Offset = "<< _origin.x << " " << _origin.y << " " << _origin.z << "\n" // Maybe... :(
+            << "Offset = 0 0 0\n"
             << "CenterOfRotation = 0 0 0\n"
             << "AnatomicalOrientation = 0 0 0\n"
             << "ElementSpacing = "<< _voxelSize.x << " " << _voxelSize.y << " " << _voxelSize.z << "\n"

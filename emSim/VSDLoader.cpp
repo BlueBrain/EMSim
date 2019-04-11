@@ -35,7 +35,6 @@ VSDLoader::VSDLoader(const VSDParams& params)
     , _v0(params.v0)
     , _apThreshold(params.apThreshold)
     , _fraction(params.fraction)
-    , _dt(0.1f)
     , _currentFrame(0u)
     , _bc(params.inputFile)
     , _attenuationCurve(params.curveFile, params.depth)
@@ -47,7 +46,15 @@ VSDLoader::VSDLoader(const VSDParams& params)
     auto reportSource = _bc.getReportSource(params.reportVoltage);
     _reportVoltage.reset(new brion::CompartmentReport(reportSource, brion::MODE_READ, _gids));
     _reportArea.reset(new brion::CompartmentReport(servus::URI(params.reportArea), brion::MODE_READ, _gids));
+
+    const uint32_t timeStepMultiplier = params.timeStep / _reportVoltage->getTimestep() + 0.5f;
+    _dt = timeStepMultiplier * _reportVoltage->getTimestep();
+    std::cout << "INFO: TimeStep rounded to a multiple of the report time step: " << _dt << std::endl;
+
     _validateTimeRange();
+
+    _numberOfFrames = 1u + (_timeRange.y - _timeRange.x) / _dt;
+    std::cout << "INFO: Total number of frames: " << _numberOfFrames << std::endl;
 
     if(_reportVoltage->getFrameSize() != _reportArea->getFrameSize())
          throw(std::runtime_error("ERROR: area and voltage report sizes don't match"));
@@ -55,9 +62,7 @@ VSDLoader::VSDLoader(const VSDParams& params)
     _reportArea->updateMapping(_gids);
     _areas = _reportArea->loadFrame(0.0f).get().data;
 
-    _loadStaticEventGeometry(params.sensorDim, params.sensorRes, params.interpolateAttenuation);
-
-    _numberOfFrames = 1u + std::floor((_timeRange.y - _timeRange.x) / _reportVoltage->getTimestep() + 0.5f);
+    _loadStaticEventGeometry(params.sensorDim, params.sensorRes, params.interpolateAttenuation); 
 
     if(params.exportSomaPixels)
         _writeSomaFile(params.outputFileName);
@@ -67,7 +72,6 @@ const std::shared_ptr<Volume> VSDLoader::loadNextFrame()
 {
     _volume->clear(0.0f);
     brion::floatsPtr data = _reportVoltage->loadFrame(_currentFrame * _dt + _timeRange.x).get().data;
-    std::cout << "frame: " << _currentFrame * _dt + _timeRange.x << std::endl; 
     for(uint32_t i = 0; i < _reportVoltage->getFrameSize(); ++i)
     {
         const int64_t index = _weightedLinks[i].voxelIndex; 
@@ -79,6 +83,7 @@ const std::shared_ptr<Volume> VSDLoader::loadNextFrame()
         else
             continue;
     }
+    std::cout << "INFO: Frame: " << _currentFrame * _dt + _timeRange.x << " done" << std::endl; 
     ++_currentFrame;
     return _volume;
 }
@@ -86,8 +91,7 @@ const std::shared_ptr<Volume> VSDLoader::loadNextFrame()
 void VSDLoader::_loadStaticEventGeometry(const float sensorDim, const uint32_t sensorRes, const bool interpolate)
 {
     _reportVoltage->updateMapping(_gids);
-    std::cout << "INFO: loading " << _reportVoltage->getFrameSize() << " compartments..."
-              << std::endl;
+    std::cout << "INFO: loading " << _reportVoltage->getFrameSize() << " compartments..." << std::endl;
 
     uint32_t moprhosPerBatch = 10000u;
     uint32_t batchesCount = (_gids.size() - 1u) / moprhosPerBatch + 1u;
@@ -221,13 +225,13 @@ void VSDLoader::_validateTimeRange()
     if (_timeRange.x < 0.0f || _timeRange.y < 0.0f)
     {
         _timeRange = glm::vec2(_reportVoltage->getStartTime(),
-                               _reportVoltage->getEndTime() - _reportVoltage->getTimestep());
+                               _reportVoltage->getEndTime() - _dt);
         std::cout << "WARNING: Time range used is the maximum available."
                   << std::endl;
     }
-    else if (_timeRange.y > _reportVoltage->getEndTime() - _reportVoltage->getTimestep())
+    else if (_timeRange.y > _reportVoltage->getEndTime() - _dt)
     {
-        _timeRange.y = _reportVoltage->getEndTime() - _reportVoltage->getTimestep();
+        _timeRange.y = _reportVoltage->getEndTime() - _dt;
         std::cout << "WARNING: Time range is clamped to the maximum bound."
                   << std::endl;
     }
@@ -241,7 +245,7 @@ void VSDLoader::_validateTimeRange()
 
     std::cout << "INFO: Time range is: [" << _timeRange.x << " " << _timeRange.y
               << "]"
-              << " with DT: " << _reportVoltage->getTimestep() << std::endl;
+              << " with DT: " << _dt << std::endl;
 
     if (_timeRange.x > _timeRange.y)
         throw(std::runtime_error("ERROR: invalid time range"));
@@ -297,7 +301,7 @@ void VSDLoader::_writeSomaFile(const std::string& baseName) const
                  << std::floor((pos[0] - origin[0]) / spacing[0]) << " "
                  << std::floor((pos[1] - origin[1]) / spacing[1]) << " "
                  << std::floor((pos[2] - origin[2]) / spacing[2])
-                 << std::endl; //Write for Y also !!
+                 << std::endl;
         }
     }
 

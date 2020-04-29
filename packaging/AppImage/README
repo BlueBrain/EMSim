@@ -1,0 +1,14 @@
+The generation of AppImage is performed in a Docker container.
+For that purpose two Docker images are used; base image where all dependencies
+are installed and another where EMSim is built. You don't have to build base
+image, as it is available at Docker Hub as bluebrain/rtneuron_builder.
+
+
+Step-by-step instruction on generating EMSim AppImage
+
+1. Build a docker image with command below:
+   - docker build  -f DockerfileAppImage  -t app_image_builder .
+2. Start the container mounting the volume where the AppImage  will be copied
+   (e.g. current working directory):
+   - docker run -ti --rm -v $(pwd):/tmp/output app_image_builder
+   Built AppImage is copied into current path as emsim_x86_64.AppImage

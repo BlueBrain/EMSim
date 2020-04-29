@@ -34,10 +34,10 @@ if(NOT ISPC)
   if(NOT EXISTS ${ISPC_BINARY})
     message("ispc not found. Trying to download... " ${ISPC_BINARY})
     file(DOWNLOAD
-         https://sourceforge.net/projects/ispcmirror/files/v1.9.2/ispc-v1.9.2-linux.tar.gz
-         ${CMAKE_BINARY_DIR}/ispc-v1.9.2-linux.tar.gz
+         https://github.com/ispc/ispc/releases/download/v1.9.2/ispc-v1.9.2b-linux.tar.gz
+         ${CMAKE_BINARY_DIR}/ispc-v1.9.2b-linux.tar.gz
          SHOW_PROGRESS)
-    execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzf ispc-v1.9.2-linux.tar.gz
+    execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzf ispc-v1.9.2b-linux.tar.gz
                     WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
   endif()
 endif()

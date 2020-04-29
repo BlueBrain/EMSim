@@ -1,0 +1,30 @@
+FROM bluebrain/rtneuron_builder
+
+ADD . /emsim
+RUN mkdir -p /app/emsim/usr/ /emsim/build/
+RUN cd /emsim/build && cmake .. \
+    -DCLONE_SUBPROJECTS=ON -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/app/emsim/usr/ && \
+    make -j install
+
+WORKDIR /app/emsim
+RUN  cp -P /usr/local/lib64/lib*so* /usr/local/lib/lib*so* usr/lib
+
+# APP image
+###################
+WORKDIR /root
+RUN curl -LO https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage && \
+chmod +x ./linuxdeploy-x86_64.AppImage
+
+
+# AppImageTool
+RUN curl -LO https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+RUN chmod +x /root/appimagetool-x86_64.AppImage
+RUN /root/appimagetool-x86_64.AppImage --appimage-extract
+
+WORKDIR /app/emsim
+
+ADD packaging/AppImage/config .
+RUN chmod +x AppRun
+
+CMD ["/root/squashfs-root/AppRun", "/app/emsim", "/tmp/output/emsim_x86_64.AppImage"]

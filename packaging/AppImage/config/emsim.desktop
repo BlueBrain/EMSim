@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Exec=emsin
+Name=emsim;
+Comment=LFP calculation tool
+Categories=Science;
+Icon=emsim

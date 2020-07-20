@@ -2,7 +2,7 @@
 # All rights reserved. Do not distribute without permission.
 # Responsible Author: Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
 #
-# This file is part of EMSim <https://bbpcode.epfl.ch/browse/code/viz/EMSim/>
+# This file is part of EMSim <https://github.com/BlueBrain/EMSim>
 
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 project(EMSim VERSION 1.0.0)

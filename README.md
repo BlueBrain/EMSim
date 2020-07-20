@@ -5,8 +5,9 @@ like LPF and VSD
 
 ## Features
 
-Hello provides the following functionality:
+EMSim provides the following functionality:
 * Compute LFP
+* Compute VSD
 
 ## Building from Source
 
@@ -18,9 +19,29 @@ environments are tested:
 
 Building from source is as simple as:
 
-    git clone --recursive https://bbpcode.epfl.ch/code/a/viz/EMSim
-    mkdir EMSim/build
-    cd EMSim/build
+    git clone --recursive https://github.com/BlueBrain/EMSim
+    cd EMSim
+    git submodule update --init
+    mkdir build
+    cd build
     cmake -DCLONE_SUBPROJECTS=ON -GNinja ..
     ninja
+
+The final executables will be located in the build/bin folder.
+
+## Usage
+
+Compute the LFP values on 2 probes:
+
+    emsim -i blueconfigFile -o outputFileName --target cuirtcuitTarget --report currentReport --sample-point 12,34,32 --sample-point 43,56,43
+
+Compute the VSD with 1000um sensor size with a 512 resolution:
+
+    emsimVSD -i blueconfigFile -o outputFileName --target cuirtcuitTarget --report-voltage voltageReport --report-area areaReport --sensor-dim 1000 --sensor-res 512
+
+## Acknowledgement & Funding
+
+This project was supported by funding to the Blue Brain Project, a research 
+center of the École polytechnique fédérale de Lausanne (EPFL), from the Swiss 
+government's ETH Board of the Swiss Federal Institutes of Technology.
 

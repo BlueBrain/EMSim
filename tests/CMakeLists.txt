@@ -1,14 +1,20 @@
-# Copyright (c) BBP/EPFL 2011-2017, Stefan.Eilemann@epfl.ch
-# Change this number when adding tests to force a CMake run: 1
+## Copyright (c) BBP/EPFL 2011-2017, Stefan.Eilemann@epfl.ch
 
-# Includes the install_files function below
-include(InstallFiles)
+find_package(Boost REQUIRED COMPONENTS unit_test_framework)
 
-# TEST_LIBRARIES variable is used by the CommonCTest.cmake script to link against the given libraries
-set(TEST_LIBRARIES ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} EMSimCommon)
+set(TESTS_SRC
+    samplePoints.cpp
+    volume.cpp
+)
 
-# CommonCTest, in the current folder recursively compiles targets for *.cpp files using TEST_LIBRARIES
-include(CommonCTest)
+foreach(FILE ${TESTS_SRC})
+    get_filename_component(NAME ${FILE} NAME_WE)
+    add_executable(${NAME} ${FILE})
 
-# Installs the compiled tests ${TEST_FILES} into the examples directory
-install_files(share/EMSim/tests FILES ${TEST_FILES} COMPONENT examples)
+    target_link_libraries(${NAME}
+        PRIVATE
+        ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+        EMSimCommon
+        )
+    add_test(NAME ${NAME} COMMAND ${NAME})
+endforeach()

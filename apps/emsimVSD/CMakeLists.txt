@@ -17,7 +17,10 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-set(EMSIMVSD_SOURCES main.cpp)
-set(EMSIMVSD_LINK_LIBRARIES PUBLIC boost_program_options EMSimCommon )
-
-common_application( emsimVSD )
+add_executable(emsimVSD main.cpp)
+target_link_libraries(emsimVSD
+                      PUBLIC
+                          ${Boost_PROGRAM_OPTIONS_LIBRARY}
+                          EMSimCommon
+                      )
+install(TARGETS emsimVSD RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})

@@ -114,8 +114,8 @@ void EventsLoader::_computeStaticEventGeometry(
             {
                 auto pos = soma.getCentroid();
                 float radius = soma.getMeanRadius();
-                _events->addEvent(glm::vec3(pos.x(), pos.y(), pos.z()), radius);
-                _circuitAABB.add(glm::vec3(pos.x(), pos.y(), pos.z()), radius);
+                _events->addEvent(pos, radius);
+                _circuitAABB.add(pos, radius);
             }
             continue;
         }
@@ -136,10 +136,10 @@ void EventsLoader::_computeStaticEventGeometry(
 
         for (const auto& point : points)
         {
-            auto pos = point.get_sub_vector<3, 0>();
+            auto pos = glm::vec3(point);
             float radius = compartmentLength * .2f;
-            _events->addEvent(glm::vec3(pos.x(), pos.y(), pos.z()), radius);
-            _circuitAABB.add(glm::vec3(pos.x(), pos.y(), pos.z()), radius);
+            _events->addEvent(pos, radius);
+            _circuitAABB.add(pos, radius);
         }
     }
 }

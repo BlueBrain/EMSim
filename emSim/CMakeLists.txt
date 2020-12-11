@@ -85,3 +85,10 @@ target_link_libraries(EMSimCommon
                           Brain
                           glm
                       )
+
+install(TARGETS EMSimCommon
+   EXPORT EMSimCommon
+   LIBRARY
+      DESTINATION lib
+)
+

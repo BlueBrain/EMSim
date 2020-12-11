@@ -29,6 +29,4 @@ add_subdirectory(apps)
 add_subdirectory(emSim)
 add_subdirectory(tests)
 
-export(PACKAGE emSim)
-
 #include(DoxygenRule)

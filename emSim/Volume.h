@@ -19,8 +19,9 @@
 
 #ifndef _Volume_h_
 #define _Volume_h_
-
+#define GLM_FORCE_CTOR_INIT
 #include <glm/glm.hpp>
+
 #include <string>
 #include <vector>
 

@@ -24,7 +24,7 @@ Building from source is as simple as:
     git submodule update --init
     mkdir build
     cd build
-    cmake -DCLONE_SUBPROJECTS=ON -GNinja ..
+    cmake -GNinja ..
     ninja
 
 The final executables will be located in the build/bin folder.

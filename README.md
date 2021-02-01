@@ -21,7 +21,6 @@ Building from source is as simple as:
 
     git clone --recursive https://github.com/BlueBrain/EMSim
     cd EMSim
-    git submodule update --init
     mkdir build
     cd build
     cmake -GNinja ..

@@ -62,6 +62,33 @@ foreach(ISPC_FILE ${ISPC_FILES})
   list(APPEND EMSIMCOMMON_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/${ISPC_FILE}.o )
 endforeach()
 
-set(EMSIMCOMMON_LINK_LIBRARIES PUBLIC Brion Brain  glm)
+set(EMSIM_INCLUDE_DIR ${PROJECT_SOURCE_DIR})
 
-common_library(EMSimCommon)
+add_library(EMSimCommon
+            SHARED
+                ${EMSIMCOMMON_PUBLIC_HEADERS}
+                ${EMSIMCOMMON_HEADERS}
+                ${EMSIMCOMMON_SOURCES}
+           )
+
+target_include_directories(EMSimCommon PUBLIC
+                           $<BUILD_INTERFACE:${EMSIM_INCLUDE_DIR}>
+                           $<INSTALL_INTERFACE:include>)
+target_include_directories(EMSimCommon PUBLIC
+                           $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/>
+                           $<INSTALL_INTERFACE:$/include>)
+target_include_directories(EMSimCommon SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
+
+target_link_libraries(EMSimCommon
+                      PUBLIC
+                          Brion
+                          Brain
+                          glm
+                      )
+
+install(TARGETS EMSimCommon
+   EXPORT EMSimCommon
+   LIBRARY
+      DESTINATION lib
+)
+

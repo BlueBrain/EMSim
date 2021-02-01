@@ -1,6 +1,0 @@
-[submodule "CMake/common"]
-	path = CMake/common
-	url = https://github.com/Eyescale/CMake
-[submodule "glm"]
-	path = glm
-	url = https://github.com/g-truc/glm.git

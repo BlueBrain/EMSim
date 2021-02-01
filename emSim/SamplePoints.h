@@ -20,7 +20,9 @@
 #ifndef _SamplePoints_h_
 #define _SamplePoints_h_
 
+#define GLM_FORCE_CTOR_INIT
 #include <glm/glm.hpp>
+
 #include <string>
 #include <vector>
 

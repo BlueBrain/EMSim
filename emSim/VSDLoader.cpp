@@ -19,8 +19,6 @@
 
 #include <iostream>
 
-#include <servus/servus.h>
-
 #include <emSim/VSDLoader.h>
 
 namespace ems
@@ -41,9 +39,10 @@ VSDLoader::VSDLoader(const VSDParams& params)
     _circuit.reset(new brain::Circuit(_bc));
     _gids = params.target.empty() ? _circuit->getRandomGIDs(params.fraction)
                                   : _circuit->getRandomGIDs(params.fraction, params.target);
-    auto reportSource = _bc.getReportSource(params.reportVoltage);
-    _reportVoltage.reset(new brion::CompartmentReport(reportSource, brion::MODE_READ, _gids));
-    _reportArea.reset(new brion::CompartmentReport(servus::URI(params.reportArea), brion::MODE_READ, _gids));
+    auto reportSourceVoltage = _bc.getReportSource(params.reportVoltage);
+    _reportVoltage.reset(new brion::CompartmentReport(reportSourceVoltage, brion::MODE_READ, _gids));
+    auto reportSourceArea = _bc.getReportSource(params.reportArea);
+    _reportArea.reset(new brion::CompartmentReport(reportSourceArea, brion::MODE_READ, _gids));
 
     const uint32_t timeStepMultiplier = params.timeStep / _reportVoltage->getTimestep() + 0.5f;
     _dt = timeStepMultiplier * _reportVoltage->getTimestep();
@@ -183,10 +182,9 @@ void VSDLoader::_computeStaticEventGeometry(const FlatInverseMapping& mapping,
             const auto& soma = morphology.getSoma();
             const auto pos = soma.getCentroid();
             const float radius = soma.getMeanRadius();
-            _circuitAABB.add(glm::vec3(pos.x(), pos.y(), pos.z()),
-                             radius);            
+            _circuitAABB.add(pos, radius);            
             for (uint16_t k = 0; k != compartments; ++k)
-                positions.push_back(glm::vec3(pos.x(), pos.y(), pos.z()));
+                positions.push_back(pos);
 
             continue;
         }
@@ -210,10 +208,10 @@ void VSDLoader::_computeStaticEventGeometry(const FlatInverseMapping& mapping,
 	assert(compartments == points.size());
         for (const auto& point : points)
         {
-            auto pos = point.get_sub_vector<3, 0>();
+            auto pos = glm::vec3(point);
             float radius = compartmentLength * .2f;
-            positions.push_back(glm::vec3(pos.x(), pos.y(), pos.z()));
-            _circuitAABB.add(glm::vec3(pos.x(), pos.y(), pos.z()), radius);
+            positions.push_back(pos);
+            _circuitAABB.add(pos, radius);
         }
     }
 }

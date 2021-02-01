@@ -5,48 +5,26 @@
 # This file is part of EMSim <https://github.com/BlueBrain/EMSim>
 
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
-project(EMSim VERSION 1.0.0)
+project(EMSim VERSION 1.0.1)
 set(EMSim_VERSION_ABI 1)
 
-if(NOT EXISTS ${CMAKE_SOURCE_DIR}/CMake/common/Common.cmake)
-  message(FATAL_ERROR "CMake/common missing, run: git submodule update --init")
-endif()
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake
-                              ${CMAKE_SOURCE_DIR}/CMake/common)
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake)
 
-set(EMSIM_LICENSE LGPL)
-set(EMSIM_DESCRIPTION "Electro-magnetic simulation software")
-set(COMMON_PROJECT_DOMAIN ch.epfl.bluebrain)
-set(EMSIM_DEB_DEPENDS libboost-program-options-dev libboost-test-dev libglm-dev)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
-include(Common)
-
-common_find_package(Boost REQUIRED COMPONENTS unit_test_framework program_options)
-common_find_package(Brion REQUIRED)
-common_find_package_post()
+find_package(glm)
+find_package(Boost REQUIRED COMPONENTS program_options)
+find_package(Brion REQUIRED)
 
 set(ISPC_BINARY ispc)
-
 find_program(ISPC ispc)
-if(NOT ISPC)
-  set(ISPC_BINARY ${CMAKE_BINARY_DIR}/ispc-v1.9.2-linux/ispc)
-  if(NOT EXISTS ${ISPC_BINARY})
-    message("ispc not found. Trying to download... " ${ISPC_BINARY})
-    file(DOWNLOAD
-         https://github.com/ispc/ispc/releases/download/v1.9.2/ispc-v1.9.2b-linux.tar.gz
-         ${CMAKE_BINARY_DIR}/ispc-v1.9.2b-linux.tar.gz
-         SHOW_PROGRESS)
-    execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzf ispc-v1.9.2b-linux.tar.gz
-                    WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
-  endif()
-endif()
 
-add_subdirectory(glm)
+enable_testing()
+
 add_subdirectory(apps)
 add_subdirectory(emSim)
 add_subdirectory(tests)
-
-set(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/README.md")
-set(EMSIM_PACKAGE_DEB_DEPENDS libboost-program-options-dev libglm-dev)
-include(DoxygenRule)

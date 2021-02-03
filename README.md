@@ -1,7 +1,7 @@
 # EMSIM
 
-EMSim is a library that compute different electro-magnetic effects 
-like LPF and VSD
+EMSim is a library that computes different electro-magnetic effects
+like LPF and VSD.
 
 ## Features
 

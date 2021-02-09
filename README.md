@@ -1,7 +1,7 @@
 # EMSIM
 
-EMSim is a library that compute different electro-magnetic effects 
-like LPF and VSD
+EMSim is a library that computes different electro-magnetic effects
+like LPF and VSD.
 
 ## Features
 
@@ -21,7 +21,6 @@ Building from source is as simple as:
 
     git clone --recursive https://github.com/BlueBrain/EMSim
     cd EMSim
-    git submodule update --init
     mkdir build
     cd build
     cmake -GNinja ..

@@ -49,8 +49,9 @@ jobs:
 
       - name: Manually install libsonata
         run: |
-          git clone --depth=1 --recursive --shallow-submodules https://github.com/BlueBrain/libsonata
+          git clone https://github.com/BlueBrain/libsonata
           cd libsonata
+          git submodule update --init --recursive
           mkdir build && cd build
           cmake .. \
             -GNinja \
@@ -62,8 +63,9 @@ jobs:
 
       - name: Manually install Brion
         run: |
-          git clone --depth=1 --recursive --shallow-submodules https://github.com/BlueBrain/Brion
+          git clone https://github.com/BlueBrain/Brion
           cd Brion/
+          git submodule update --init --recursive
           mkdir build && cd build
           cmake .. \
             -GNinja \

@@ -1,0 +1,89 @@
+name: Run tests
+on: [pull_request, push]
+
+jobs:
+  build-linux-cpp:
+    name: Run tests on ubuntu-20.04
+    runs-on: ubuntu-20.04
+
+    # Run on external PRs, but not internal PRs as they'll be run by the push
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
+
+    steps:
+      - name: Install packages
+        run: |
+            sudo apt-get update
+            sudo apt-get install               \
+                build-essential                \
+                cmake                          \
+                ninja-build                    \
+                libboost-python-dev            \
+                libboost-date-time-dev         \
+                libboost-filesystem-dev        \
+                libboost-iostreams-dev         \
+                libboost-program-options-dev   \
+                libboost-test-dev              \
+                libhdf5-dev
+
+      - name: Manually install ISPC
+        run: |
+          # don't try and build ispc, just use the binary like spack does
+          # https://github.com/BlueBrain/spack/pull/1067/files
+          wget https://github.com/ispc/ispc/releases/download/v1.14.1/ispc-v1.14.1-linux.tar.gz
+          tar xfz ispc-v1.14.1-linux.tar.gz
+          sudo cp ispc-v1.14.1-linux/bin/ispc /bin
+
+      - name: Manually install GLM
+        # can't use the system one, since mismatch with Brion; can't use
+        # inbuilt brion modules version, since doesn't properly install CMake
+        # dependencies such that emsim can pick them up
+        run: |
+          git clone https://github.com/g-truc/glm
+          cd glm
+          git checkout 0.9.9.3
+          mkdir build && cd build
+          cmake .. \
+            -GNinja
+          ninja
+          sudo ninja install
+
+      - name: Manually install libsonata
+        run: |
+          git clone https://github.com/BlueBrain/libsonata
+          cd libsonata
+          git submodule update --init --recursive
+          mkdir build && cd build
+          cmake .. \
+            -GNinja \
+            -DEXTLIB_FROM_SUBMODULES=ON \
+            -DSONATA_PYTHON=OFF \
+            -DSONATA_TESTS=OFF
+          ninja
+          sudo ninja install
+
+      - name: Manually install Brion
+        run: |
+          git clone https://github.com/BlueBrain/Brion
+          cd Brion/
+          git submodule update --init --recursive
+          mkdir build && cd build
+          cmake .. \
+            -GNinja \
+            -DBRION_REQUIRE_PYTHON=OFF \
+            -DBRION_SKIP_LIBSONATA_SUBMODULE=ON
+          ninja
+          sudo ninja install
+
+      - name: Update ldconfig
+        run: |
+          sudo ldconfig -v
+
+      - name: Build emsim
+        run: |
+          git clone https://github.com/BlueBrain/emsim
+          cd emsim
+          git submodule update --init
+          mkdir build && cd build
+          cmake -GNinja ..
+          ninja
+          ninja test

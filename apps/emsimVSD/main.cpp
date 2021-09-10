@@ -86,7 +86,7 @@ bool parseArgs(ems::VSDParams& params, int argc, char* argv[])
          "(if 'export-volume' specified) and 2D image files")
         ("target", po::value<std::string>(&params.target), "The circuit's target.")
         ("report-voltage", po::value<std::string>(&params.reportVoltage)->required(), "The name of the voltage report in the Blueconfig.")
-        ("report-area", po::value<std::string>(&params.reportArea)->required(), "The path of the area report file.")
+        ("report-area", po::value<std::string>(&params.reportArea)->required(), "The name of the area report in the BlueConfig.")
         ("sensor-res", po::value<size_t>(&params.sensorRes)->default_value(params.sensorRes), "Number of pixels per side "
          "of the square sensor.")
         ("sensor-dim", po::value<float>(&params.sensorDim)->default_value(params.sensorDim), "Length of side of the square "
@@ -94,10 +94,10 @@ bool parseArgs(ems::VSDParams& params, int argc, char* argv[])
         ("curve", po::value<std::string>(&params.curveFile), "Path to the dye curve file (default: no attenuation)")
         ("start-time", po::value<float>(&params.timeRange.x), "The start time of the simulation")
         ("end-time", po::value<float>(&params.timeRange.y), "The end time of the simulation")
-        ("time-step", po::value<float>(&params.timeStep), "The time between frames")
+        ("time-step", po::value<float>(&params.timeStep), "The time between frames in milliseconds")
         ("fraction", po::value<float>(&params.fraction), "Specify the fraction [0.0 1.0] of gids to be used "
          "during the computation. Default is 1.0.")
-        ("export-volume", "Will export a floating point volume for each time steps.")
+        ("export-volume", "Will export a floating point volume for each time step.")
         ("depth", po::value<float>(&params.depth)->default_value(params.depth), "Depth of the attenuation curve area of "
          "influence. It also defines the Y-coordinate at which it starts being applied down until y=0 (default: 2081.756 "
          "micrometers).")

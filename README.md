@@ -9,25 +9,19 @@ EMSim provides the following functionality:
 
 In order to compute LFP or VSD, there are a few common initial steps:
 
-1.Load the circuit data from a circuit file
-2.Create all the static morphology geometry
-3.Apply current and voltage report on the geometry
-4.Finally, specific calculations are done to compute LFP or VSD
+1. Load the circuit data from a circuit file
+2. Create all the static morphology geometry
+3. Apply current and voltage report on the geometry
+4. Finally, specific calculations are done to compute LFP or VSD
 
-
-The LFP part of EMSim computes the electric field in the space between neurons.
-For that, the below steps are executed:
+The LFP part of EMSim computes the electric field in the space between neurons, using the following method:
 
 1. Load and place all segments in 3D space
 2. Load the current report for each segment and for every simulation frame
 3. Create a volume with the specified resolution (# of voxels)
-4. Compute the value for each voxel, using the current point model
-a. As a simplification, one can also compute the values of some sample
-points instead of the full volume
+4. Compute the value for each voxel, using the current point model (one can also compute the values of some sample points instead of the full volume)
 
-
-The VSD part of EMSim simulates the processes of a voltage sensitive dye.
-For that, the below steps are executed:
+The VSD part of EMSim simulates the processes of a voltage sensitive dye, using the following method:
 
 1. Load and place all segments in 3D space
 2. Load the voltage report for each segment and for every simulation frame
@@ -35,17 +29,34 @@ For that, the below steps are executed:
 4. For each voxel, the value is accumulated
 5. Create a projection of the volume into a 2D surface
 
-
-* Compute LFP:
-    TODO: describe algorithm
-
-* Compute VSD
-    TODO: describe algorithm
-
 ## Usage
 
-Compute the LFP values on 2 probes:
+### emsim
+The `emsim` program has the following options:
 
+```
+  -i [ --input ] arg    Path to Blueconfig file.
+  -o [ --output ] arg   Path for the output file.
+  --target arg          The circuit's target.
+  --report arg          The name of the report.
+  --start-time arg      The start time
+  --end-time arg        The end time
+  --fraction arg        Specify the fraction [0.0 1.0] of gids to be used 
+                        during the computation. Default is 1.0.
+  --export-volume       Will export a floating point volume for each time 
+                        steps.
+  --voxel-size arg      The size in each dimension of a voxel in circuit units.
+                        Default is 4.0,4.0,4.0. Must be written in the form: 
+                        --voxel-size rx,ry,rz
+  --volume-extent arg   Specify an additional 3d extent for the volume in 
+                        micrometers. Default is 0.0,0.0,0.0. Must be written in
+                        the form: --volume-extent ex,ey,ez
+  --sample-point arg    The x y z positions of a sample point. Must be written 
+                        in the form: --sample-point x,y,z
+```
+
+So, for example, to compute the LFP values on 2 probes:
+```
     emsim                        \
         -i blueconfigFile        \
         -o outputFileName        \
@@ -53,9 +64,58 @@ Compute the LFP values on 2 probes:
         --report currentReport   \
         --sample-point 12,34,32  \
         --sample-point 43,56,43  \
+```
 
-Compute the VSD with 1000um sensor size with a 512 resolution:
+### emsimVSD
 
+The `emsim` program has the following options:
+
+```
+  -i [ --input ] arg                   Path to Blueconfig file.
+  -o [ --output ] arg                  Name of the output volume (if 
+                                       'export-volume' specified) and 2D image 
+                                       files
+  --target arg                         The circuit's target.
+  --report-voltage arg                 The name of the voltage report in the BlueConfig.
+  --report-area arg                    The name of the area report in the BlueConfig.
+  --sensor-res arg (=512)              Number of pixels per side of the square 
+                                       sensor.
+  --sensor-dim arg (=1000)             Length of side of the square sensor in 
+                                       micrometers.
+  --curve arg                          Path to the dye curve file (default: no 
+                                       attenuation)
+  --start-time arg                     The start time of the simulation
+  --end-time arg                       The end time of the simulation
+  --time-step arg                      The time between frames, in milliseconds
+  --fraction arg                       Specify the fraction [0.0 1.0] of gids 
+                                       to be used during the computation. 
+                                       Default is 1.0.
+  --export-volume                      Will export a floating point volume for 
+                                       each time steps.
+  --depth arg (=2081.7561)             Depth of the attenuation curve area of 
+                                       influence. It also defines the 
+                                       Y-coordinate at which it starts being 
+                                       applied down until y=0 (default: 
+                                       2081.756 micrometers).
+  --interpolate-attenuation            Will interpolate the attenuation curve.
+  --sigma arg (=0.00449999981)         Absorption + scattering coefficient 
+                                       (units per micrometer) in the 
+                                       Beer-Lambert law. Must be a positive 
+                                       value (default: 0.0045).
+  --v0 arg (=-65)                      Resting potential (default: -65 mV).
+  --g0 arg (=0)                        Multiplier for surface area in 
+                                       background fluorescence term.
+  --ap-threshold arg (=3.40282347e+38) Action potential threshold in 
+                                       millivolts.
+  --soma-pixels                        Produce a text file containing the GIDs 
+                                       loaded and their corresponding 3D 
+                                       positions and indices in the resulting 
+                                       2D image.
+```
+
+For example, to compute the VSD with 1000um sensor size with a 512 resolution:
+
+```
     emsimVSD                           \
         -i blueconfigFile              \
         -o outputFileName              \
@@ -64,56 +124,51 @@ Compute the VSD with 1000um sensor size with a 512 resolution:
         --report-area areaReport       \
         --sensor-dim 1000              \
         --sensor-res 512
+```
 
-from taylor
-        'emsimVSD',
-        '--start-time', str(params['start-time']),
-        '--end-time', str(params['end-time']),
-        '--time-step', str(params['time-step']),
-        '--sigma', str(params['sigma']),
-        '--g0', str(params['g0']),
-        '--curve', curve,
-        '--ap-threshold', str(params['ap-threshold']),
-        '--v0', str(params['v0']),
-        '--depth', str(params['depth']),
-        '--fraction', str(params['fraction']),
+## Input Formats
 
-        "emsim-vsd-args": {
-            "target": "string, Name of the simulated circuit target",
-            "report-voltage": "string, Name of the voltage report in the BlueConfig",
-            "report-area": "string, Name of the area report in the BlueConfig",
-            "sensor-res": int, Number of pixels per side of the square sensor,
-            "sensor-dim": float, Length of side of the square sensor in micrometers,
-            "curve": "string or null, path to a depth-dependent dye attenuation curve file. If null
-                      then `insilico_vsdi/data/RH1691-cortical-penetration-mouse.txt` is used. This
-                      file was generated by digitizing the black curve in Fig. 2L in the paper
-                      https://doi.org/10.1016/j.neuron.2006.03.043."
-            "start-time": float, Start time of the simulation in milliseconds,
-            "end-time": float, End time of the simulation in milliseconds,
-            "time-step": float, Time step between frames in milliseconds,
-            "fraction": float, The fraction [0.0 1.0] of gids to be used,
-            "export-volume": bool, Will export a floating point volume for each time steps.,
-            "depth": float, Depth of the attenuation curve in micrometers. Applied from y=0
-                    (circuit bottom) to specified height. Default: 2081.756 micrometers,
-            "interpolate-attenuation": bool, Will interpolate the attenuation curve,
-            "sigma": float, Effective modified Beer-Lambert law extinction coefficient (inverse of
-                    mean photon path length between scattering events, inverse meters). Must be a
-                    positive value (default: 0.0015),
-            "v0": float, Mean resting potential (default: -65 mV),
-            "g0": float, Autofluorescence and noise calibration scale factor
-                  (default: 250, unit-less),
-            "ap-threshold": float, Membrane potential value above which to threshold compartment
-                    voltage signals. Useful for excluding spiking activity from analysis.
-                    Default: 3.40282347e+38 (effectively infinite, thus no thresholding applied),
-            "soma-pixels": bool, Produce a text file containing the GIDs loaded and their
-                  corresponding 3D positions and indices in the resulting 2D image
-        },
+###  VSD Curve File
+
+When using the `--curve` option, a file must be supplied.
+This is a depth-dependent dye attenuation curve file that contains a column of floating point values, one for every micrometer specified by the `--depth` argument
+
 
 ## Output Format
-    TODO: describe the output formats
 
-# Soma position and corresponding pixel index for each cell, in the following format:
-#     gid [ posX posY posZ ]: i j
+### LFP
+
+#### export-volume
+Triggered by the `export-volume` option.
+
+#### sample-point
+
+This writes a file called `$output$_sample_points` where `$output$` is the value of the `--output` argument.
+Lines in this file starting with `#` are comments;
+For each frame in the report a line is generated with the following format:
+
+```
+timestamp samplePoint1 samplePoint2 ... samplePointN
+```
+
+Where the `samplePointN` is the voltage at that point.
+
+#### export-volume
+Triggered by the `export-volume` option.
+
+This option writes two files (where `$output$` is the value of the `--output` argument):
+* a `raw` file called: `$output$_volume_floats$timestamp$.raw` for each frame, containing the LFP voxel values for each voxel
+* a txt file called `$output$_volume_info_$timestamp$.txt` for each frame.
+
+### VSD 
+
+* `$output$_image_floats_$timestamp$.raw`, containing the raw binary data of the 2 dimensional viewport.
+* an `MHD` file for each frame called `$output$_image_floats_$timestamp$.mhd`, containg the header information for the above.
+
+#### volume-info
+This option writes two files (where `$output$` is the value of the `--output` argument):
+* `$output$_volume_floats_$timestamp$.raw`, much like the one from LFP.
+* an `MHD` file for each frame called `$output$_volume_floats_$timestamp$.mhd`, containing the header imformation for the above.
 
 ## Acknowledgement & Funding
 

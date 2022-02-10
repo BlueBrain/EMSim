@@ -88,7 +88,7 @@ bool parseArgs(EmsimParams& params, int argc, char* argv[])
         ("end-time", po::value<float>(&params.timeRange.y), "The end time")
         ("fraction", po::value<float>(&params.fraction), "Specify the fraction [0.0 1.0] of gids to be used "
          "during the computation. Default is 1.0.")
-        ("export-volume", "Will export a floating point volume for each time steps.\n")
+        ("export-volume", "Will export a floating point volume for each time step.\n")
         ("voxel-size", po::value<glm::vec3>(&params.voxelSize), "The size in each dimension "
          "of a voxel in circuit units. Default is 4.0,4.0,4.0. Must be written in the form: "
          "--voxel-size rx,ry,rz")

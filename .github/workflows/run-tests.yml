@@ -78,11 +78,11 @@ jobs:
         run: |
           sudo ldconfig -v
 
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
       - name: Build emsim
         run: |
-          git clone https://github.com/BlueBrain/emsim
-          cd emsim
-          git submodule update --init
           mkdir build && cd build
           cmake -GNinja ..
           ninja

@@ -34,6 +34,7 @@ EventsLoader::EventsLoader(const std::string& filePath,
 
     auto reportSource = _bc.getReportSource(report);
     _report.reset(new brion::CompartmentReport(reportSource, brion::MODE_READ));
+
     _validateTimeRange();
 
     _numberOfFrames =
@@ -233,6 +234,7 @@ FlatInverseMapping EventsLoader::_computeInverseMapping() const
         for (size_t j = 0; j != offsets[i].size(); ++j)
         {
             const size_t count = counts[i][j];
+
             if (count != 0)
                 mapping.push_back(std::make_tuple(i, j, count));
         }

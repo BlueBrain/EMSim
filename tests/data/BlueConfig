@@ -1,0 +1,206 @@
+Run Default
+{
+    MorphologyPath       /gpfs/bbp.cscs.ch/project/proj112/entities/morphologies/20211019/
+    METypePath           /gpfs/bbp.cscs.ch/project/proj112/entities/emodels/20211019/hoc
+    CellLibraryFile      /gpfs/bbp.cscs.ch/project/proj112/circuits/CA1/20211110-BioM/sonata/networks/nodes/hippocampus_neurons/nodes.h5
+
+    CircuitPath          /gpfs/bbp.cscs.ch/project/proj112/circuits/CA1/20211110-BioM
+    nrnPath              /gpfs/bbp.cscs.ch/project/proj112/circuits/CA1/20211110-BioM/sonata/networks/edges/functional/hippocampus_neurons__hippocampus_neurons__chemical_synapse/edges.h5
+    TargetFile           ./data/user.target
+
+    CurrentDir           ..
+    OutputRoot           .
+
+    Simulator            CORENEURON
+    RNGMode              Random123
+
+    BaseSeed             1234
+    ForwardSkip          5000
+    Dt                   0.025
+
+    CircuitTarget        slice
+    Duration             5
+    RunMode              WholeCell
+    ExtracellularCalcium 2.0
+
+    V_Init               -65.0
+    Celsius              34.0
+    SpikeLocation        AIS
+}
+
+Projection SC
+{
+    Path /gpfs/bbp.cscs.ch/project/proj112/circuits/CA1/20211110-BioM/projections/SC/functional/projections.sonata
+    PopulationID 1
+    Source Mosaic
+}
+
+Report soma
+{
+    Target Mosaic
+    Type compartment
+    ReportOn v
+    Unit mV
+    Format SONATA
+    Dt 0.1
+    StartTime 0
+    EndTime 10000
+}
+
+Report AllCompartments_SONATA
+{
+    Target LFPCompartments
+    Type Summation
+    ReportOn i_membrane
+    Unit nA
+    Format SONATA
+    Dt 0.5
+    StartTime 0
+    EndTime 10000
+}
+
+Report AllCompartments_bin
+{
+    Target LFPCompartments
+    Type Summation
+    ReportOn i_membrane
+    Unit nA
+    Format Bin
+    Dt 0.5
+    StartTime 0
+    EndTime 10000
+}
+
+# ------------------------------------------------ Stimuli --------------------------------------------------------
+
+# delayed input to Excitatory cf Inhibitory
+
+Stimulus CA3_spikes
+{
+    Mode Current
+    Delay 0
+    Duration 10000
+    Pattern SynapseReplay
+    SpikeFile /gpfs/bbp.cscs.ch/project/proj112/scratch/budd/SIMULATIONS/20220710_sc_osc_campaign/b7d99cc3-da77-4f13-a927-e4a29d63dcb3/5/input.dat
+}
+
+StimulusInject external_spikes_inject
+{
+    Stimulus CA3_spikes
+    Target slice
+}
+
+# ------------------------------------------------ Connections --------------------------------------------------------
+
+Connection All-All
+{
+    Source Mosaic
+    Destination Mosaic
+    Weight 1.0
+    SpontMinis 0
+}
+
+#Connection SC-All
+{
+    Source CA3_SP_PC
+    Destination Mosaic
+    Weight 1.0
+    SpontMinis 0
+}
+
+# NMDA time constants
+
+Connection NMDA_EE
+{
+    Source Excitatory
+    Destination Excitatory
+    SynapseConfigure %s.tau_r_NMDA = 2.93 %s.tau_d_NMDA = 148.5
+}
+
+Connection NMDA_MGE
+{
+    Source Excitatory
+    Destination nonCCK
+    SynapseConfigure %s.tau_r_NMDA = 2.93 %s.tau_d_NMDA = 148.5
+}
+
+Connection NMDA_CGE
+{
+    Source Excitatory
+    Destination CCK
+    SynapseConfigure %s.tau_r_NMDA = 2.93 %s.tau_d_NMDA = 298.75
+}
+
+#Connection SC-Exc
+{
+    Source CA3_SP_PC
+    Destination Excitatory
+    SynapseConfigure %s.tau_r_AMPA = 0.4 %s.tau_r_NMDA = 2.93 %s.tau_d_NMDA = 148.5
+}
+
+#Connection SC-Inh
+{
+    Source CA3_SP_PC
+    Destination Inhibitory
+    SynapseConfigure %s.tau_r_AMPA = 0.1 %s.tau_r_NMDA = 2.93 %s.tau_d_NMDA = 154.6
+}
+
+
+C#onnection SC-PVBC
+{
+    Source CA3_SP_PC
+    Destination SP_PVBC
+    SynapseConfigure %s.tau_r_AMPA = 0.1 %s.tau_r_NMDA = 2.93 %s.tau_d_NMDA = 154.6
+}
+
+# GABA A/B ratio
+Connection GABA_B
+{
+    Source Inhibitory
+    Destination Mosaic
+    SynapseConfigure %s.GABAB_ratio = 0
+}
+
+Connection MGGate
+{
+   Source Excitatory
+   Destination Mosaic
+   SynapseConfigure %s.mg = 1.0
+}
+
+#Connection MGGateSC
+{
+   Source CA3_SP_PC
+   Destination Mosaic
+   SynapseConfigure %s.mg = 1.0
+}
+
+# -------------------------------------------------- Custom -----------------------------------------------------------
+
+Connection PC-PC
+{
+    Source Excitatory
+    Destination Excitatory
+    Weight 1.0
+}
+
+Connection PC-INT
+{
+    Source Excitatory
+    Destination Inhibitory
+    Weight 1.0
+}
+
+Connection INT-INT
+{
+    Source Inhibitory
+    Destination Inhibitory
+    Weight 1.0
+}
+
+#Connection SC-INT
+{
+    Source CA3_SP_PC
+    Destination Inhibitory
+    Weight 1.0
+}

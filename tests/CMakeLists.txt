@@ -3,6 +3,7 @@
 find_package(Boost REQUIRED COMPONENTS unit_test_framework)
 
 set(TESTS_SRC
+    eventsLoader.cpp
     samplePoints.cpp
     volume.cpp
 )
@@ -16,5 +17,5 @@ foreach(FILE ${TESTS_SRC})
         ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
         EMSimCommon
         )
-    add_test(NAME ${NAME} COMMAND ${NAME})
+    add_test(NAME ${NAME} COMMAND ${NAME} WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
 endforeach()

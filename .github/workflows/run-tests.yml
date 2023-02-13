@@ -86,4 +86,4 @@ jobs:
           mkdir build && cd build
           cmake -GNinja ..
           ninja
-          ctest -V
+          ninja test

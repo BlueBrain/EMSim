@@ -100,11 +100,10 @@ void EventsLoader::_computeStaticEventGeometry(
 {
     for (const auto& j : mapping)
     {
-        size_t offset;
         uint32_t cellIndex;
         uint32_t sectionId;
         uint16_t compartments;
-        std::tie(offset, cellIndex, sectionId, compartments) = j;
+        std::tie(cellIndex, sectionId, compartments) = j;
 
         const auto& morphology = *morphologies[cellIndex];
         if (sectionId == 0)
@@ -237,7 +236,7 @@ FlatInverseMapping EventsLoader::_computeInverseMapping() const
             const size_t count = counts[i][j];
 
             if (count != 0)
-                mapping.push_back(std::make_tuple(offsets[i][j], i, j, count));
+                mapping.push_back(std::make_tuple(i, j, count));
         }
     }
     std::sort(mapping.begin(), mapping.end());

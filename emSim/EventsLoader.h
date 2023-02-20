@@ -28,8 +28,8 @@
 
 namespace ems
 {
-/** Tuple of buffer offset, cell index, section ID, compartment counts */
-typedef std::tuple<size_t, uint32_t, uint32_t, uint16_t> MappingElement;
+/** Tuple of buffer cell index, section ID, compartment counts */
+typedef std::tuple<uint32_t, uint32_t, uint16_t> MappingElement;
 typedef std::vector<MappingElement> FlatInverseMapping;
 
 /**
